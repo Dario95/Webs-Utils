@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planificador NY · Grupo USA</title>
+<style>
+  :root{ --ink:#1E2033; --ink2:#3A3C55; --paper:#F5F2EA; --card:#fff; --gold:#E7B23C; --goldD:#B9871E; --green:#2E9E6B; --line:#E3DECF; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; }
+  .wrap{ max-width:560px; margin:0 auto; padding:18px 16px 48px; }
+  .hero{ background:var(--ink); border-radius:16px; padding:18px; color:#fff; box-shadow:0 6px 22px rgba(30,32,51,.18); }
+  .eyebrow{ font-size:12px; letter-spacing:3px; color:var(--gold); font-weight:700; }
+  .h1{ font-size:26px; font-weight:800; line-height:1.1; margin-top:6px; }
+  .sub{ font-size:13.5px; color:#C9CADB; margin-top:6px; }
+  .lbl{ font-size:12.5px; font-weight:700; color:var(--ink2); letter-spacing:1px; margin:18px 0 8px; }
+  .members{ display:flex; gap:8px; flex-wrap:wrap; }
+  .members button{ flex:1 0 40%; padding:11px 8px; border-radius:10px; border:1.5px solid var(--line); background:var(--card); color:var(--ink2); font-weight:700; font-size:14.5px; cursor:pointer; }
+  .members button.on{ border-color:var(--goldD); background:var(--gold); color:var(--ink); }
+  .bar{ position:sticky; top:8px; z-index:5; margin-top:16px; background:var(--ink); color:#fff; border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 14px rgba(30,32,51,.22); }
+  .bar small{ font-size:11px; color:var(--gold); font-weight:700; letter-spacing:1px; }
+  .row{ width:100%; text-align:left; display:flex; align-items:center; gap:12px; background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:8px; cursor:pointer; }
+  .row.on{ border-color:var(--goldD); background:#FFFDF6; }
+  .box{ width:22px; height:22px; border-radius:6px; border:2px solid var(--line); background:#fff; display:flex; align-items:center; justify-content:center; flex:none; font-weight:900; font-size:14px; }
+  .row.on .box{ border-color:var(--goldD); background:var(--gold); }
+  .name{ flex:1; font-weight:600; font-size:14.5px; }
+  .note{ font-size:11px; color:var(--ink2); }
+  .tag{ font-size:12.5px; font-weight:800; font-variant-numeric:tabular-nums; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-top:16px; }
+  .opt{ display:flex; justify-content:space-between; padding:7px 0; border-top:1px solid var(--line); font-size:14px; }
+  .btn{ width:100%; margin-top:16px; padding:14px; border-radius:12px; border:none; background:var(--gold); color:var(--ink); font-weight:800; font-size:15.5px; cursor:pointer; }
+  .btn.green{ background:var(--green); color:#fff; }
+  .btn.ghost{ background:var(--card); border:1.5px solid var(--line); color:var(--ink2); }
+  textarea{ width:100%; min-height:80px; border:1.5px solid var(--line); border-radius:10px; padding:10px; font-size:13px; font-family:inherit; margin-top:8px; }
+  .gv{ display:flex; justify-content:space-between; padding:9px 0; border-top:1px solid var(--line); align-items:center; }
+  .total{ display:flex; justify-content:space-between; margin-top:12px; padding-top:12px; border-top:2px solid var(--ink); align-items:center; }
+  .muted{ font-size:11.5px; color:var(--ink2); }
+  .hide{ display:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">NUEVA YORK · GRUPO USA 🇺🇸</div>
+    <div class="h1">¿A dónde quieres ir?</div>
+    <div class="sub">Marca tus lugares, mira tu mejor opción de tickets, y comparte tu voto con el grupo con un código.</div>
+  </div>
+
+  <div class="lbl">¿QUIÉN ERES?</div>
+  <div class="members" id="members"></div>
+
+  <div id="picker" class="hide">
+    <div class="bar">
+      <div><small>TU MEJOR OPCIÓN</small><div id="bestLabel" style="font-size:14px;font-weight:700;">—</div></div>
+      <div style="text-align:right"><div id="bestCost" style="font-size:24px;font-weight:800;">$0</div><div style="font-size:10.5px;color:#C9CADB">por persona</div></div>
+    </div>
+
+    <div class="lbl">GRATIS · MARCA LOS QUE QUIERAS</div>
+    <div id="freeList"></div>
+    <div class="lbl">CON ENTRADA · PRECIO APROX. POR PERSONA</div>
+    <div id="paidList"></div>
+
+    <div id="compareCard" class="card hide">
+      <div class="lbl" style="margin:0 0 8px">COMPARACIÓN PARA TI</div>
+      <div id="compare"></div>
+    </div>
+
+    <button class="btn green" id="copyBtn">📋 Copiar mi voto (para el grupo)</button>
+    <p class="muted" style="text-align:center;margin-top:8px">Pega ese código en el grupo de WhatsApp. Abajo, quien junte los códigos ve el total. 👇</p>
+  </div>
+
+  <div class="card">
+    <div style="font-size:16px;font-weight:800">Resumen del grupo</div>
+    <p class="muted" style="margin:6px 0 0">Pega aquí los códigos que manden al grupo (uno por línea) y calcula todo:</p>
+    <textarea id="importBox" placeholder="NYVOTE:xxxxx&#10;NYVOTE:yyyyy"></textarea>
+    <button class="btn" id="calcBtn" style="margin-top:10px">Calcular grupo</button>
+    <div id="groupOut"></div>
+  </div>
+
+  <p class="muted" style="margin-top:14px;line-height:1.5">Precios estimados por persona (adulto), sujetos a cambio — confírmalos al comprar. Broadway, Museo del Helado y SUMMIT no entran en pases. CityPASS ~$146 (2 fijas + 3 a elección); Go City Explorer por # de atracciones.</p>
+</div>
+
+<script>
+const MEMBERS=["Homero","Daisy","Darma","Angelicke"];
+const ATTR=[
+ {id:"central_park",name:"Central Park",free:true},
+ {id:"brooklyn_bridge",name:"Brooklyn Bridge",free:true},
+ {id:"times_square",name:"Times Square",free:true},
+ {id:"staten_ferry",name:"Staten Island Ferry",free:true},
+ {id:"grand_central",name:"Grand Central",free:true},
+ {id:"fifth_ave",name:"5th Avenue",free:true},
+ {id:"chinatown",name:"Chinatown",free:true},
+ {id:"memorial911",name:"Memorial 9/11 (exterior)",free:true},
+ {id:"mcgees",name:"McGee's Pub",free:true,note:"consumo aparte"},
+ {id:"esb",name:"Empire State Building",price:44,citypass:"fixed",gocity:true},
+ {id:"amnh",name:"Museo Historia Natural (AMNH)",price:33,citypass:"fixed",gocity:true},
+ {id:"statue",name:"Estatua Libertad + Ellis Island",price:25,citypass:"choice",gocity:true},
+ {id:"topofrock",name:"Top of the Rock",price:40,citypass:"choice",gocity:true},
+ {id:"museum911",name:"Museo 9/11",price:33,citypass:"choice",gocity:true},
+ {id:"summit",name:"SUMMIT One Vanderbilt",price:49,citypass:false,gocity:false},
+ {id:"icecream",name:"Museo del Helado 🍦",price:42,citypass:false,gocity:false},
+ {id:"harrypotter",name:"Harry Potter (Broadway)",price:120,citypass:false,gocity:false},
+ {id:"zoo",name:"Central Park Zoo",price:20,citypass:false,gocity:false},
+];
+const BY={}; ATTR.forEach(a=>BY[a.id]=a);
+const CITYPASS=146, GOCITY={2:84,3:99,4:119,5:139,6:164,7:184};
+function gtier(n){ if(n<2) return null; if(n<=7) return GOCITY[n]; return GOCITY[7]+(n-7)*20; }
+
+function computeBest(paidIds){
+  const sel=paidIds.map(id=>BY[id]).filter(Boolean);
+  const individual=sel.reduce((s,a)=>s+a.price,0);
+  const fixed=sel.filter(a=>a.citypass==="fixed");
+  const choice=sel.filter(a=>a.citypass==="choice").sort((a,b)=>b.price-a.price);
+  const coveredCP=[...fixed,...choice.slice(0,3)];
+  const notCP=sel.filter(a=>!coveredCP.includes(a));
+  const citypass=coveredCP.length>=1 ? CITYPASS+notCP.reduce((s,a)=>s+a.price,0) : Infinity;
+  const goC=sel.filter(a=>a.gocity), goN=sel.filter(a=>!a.gocity);
+  const t=gtier(goC.length);
+  const gocity=t==null?Infinity:t+goN.reduce((s,a)=>s+a.price,0);
+  let opts=[{key:"ind",label:"Comprar individual",cost:individual},{key:"cp",label:"New York CityPASS",cost:citypass},{key:"go",label:"Go City Explorer",cost:gocity}].filter(o=>isFinite(o.cost));
+  opts.sort((a,b)=>a.cost-b.cost);
+  return {individual,citypass,gocity,best:opts[0]||{label:"—",cost:0,key:"ind"},opts};
+}
+
+let me=null, picks={};
+
+const membersEl=document.getElementById("members");
+MEMBERS.forEach(m=>{ const b=document.createElement("button"); b.textContent=m; b.onclick=()=>{me=m;render();}; b.dataset.m=m; membersEl.appendChild(b); });
+
+function rowHTML(a){
+  const on=!!picks[a.id];
+  const tag=a.free?'<span style="color:var(--green)">GRATIS</span>':'$'+a.price;
+  return `<button class="row ${on?'on':''}" data-id="${a.id}">
+    <div class="box">${on?'✓':''}</div>
+    <div class="name">${a.name}${a.note?`<div class="note">${a.note}</div>`:''}</div>
+    <div class="tag">${tag}</div></button>`;
+}
+
+function render(){
+  MEMBERS.forEach(m=>{ const b=membersEl.querySelector(`[data-m="${m}"]`); b.classList.toggle("on",m===me); });
+  document.getElementById("picker").classList.toggle("hide",!me);
+  if(!me) return;
+  document.getElementById("freeList").innerHTML=ATTR.filter(a=>a.free).map(rowHTML).join("");
+  document.getElementById("paidList").innerHTML=ATTR.filter(a=>!a.free).map(rowHTML).join("");
+  document.querySelectorAll(".row").forEach(r=>r.onclick=()=>{ const id=r.dataset.id; picks[id]=!picks[id]; render(); });
+
+  const paid=Object.keys(picks).filter(k=>picks[k]&&!BY[k].free);
+  const c=computeBest(paid);
+  document.getElementById("bestLabel").textContent = paid.length? c.best.label : "Solo lugares gratis 🎉";
+  document.getElementById("bestCost").textContent = "$"+(paid.length? c.best.cost.toFixed(0):"0");
+
+  const cc=document.getElementById("compareCard");
+  cc.classList.toggle("hide", paid.length===0);
+  if(paid.length){
+    document.getElementById("compare").innerHTML=c.opts.map(o=>{
+      const isBest=o.key===c.best.key;
+      return `<div class="opt"><span style="font-weight:${isBest?800:500};color:${isBest?'var(--green)':'var(--ink)'}">${isBest?'✓ ':''}${o.label}</span><span style="font-weight:700">$${o.cost.toFixed(0)}</span></div>`;
+    }).join("");
+  }
+}
+
+document.getElementById("copyBtn").onclick=()=>{
+  if(!me) return;
+  const ids=Object.keys(picks).filter(k=>picks[k]);
+  const code="NYVOTE:"+btoa(encodeURIComponent(JSON.stringify({n:me,ids})));
+  const done=()=>{ const b=document.getElementById("copyBtn"); b.textContent="✓ ¡Copiado! Pégalo en el grupo"; setTimeout(()=>b.textContent="📋 Copiar mi voto (para el grupo)",2200); };
+  if(navigator.clipboard){ navigator.clipboard.writeText(code).then(done).catch(()=>{prompt("Copia tu código:",code);}); }
+  else { prompt("Copia tu código:",code); }
+};
+
+document.getElementById("calcBtn").onclick=()=>{
+  const raw=document.getElementById("importBox").value;
+  const codes=(raw.match(/NYVOTE:[A-Za-z0-9+/=]+/g)||[]);
+  const votes={};
+  codes.forEach(code=>{ try{ const d=JSON.parse(decodeURIComponent(atob(code.replace("NYVOTE:","")))); if(d&&d.n) votes[d.n]=d.ids||[]; }catch(e){} });
+  const out=document.getElementById("groupOut");
+  const names=Object.keys(votes);
+  if(!names.length){ out.innerHTML=`<p class="muted" style="margin-top:10px">No encontré códigos válidos. Pega los que empiezan con NYVOTE:</p>`; return; }
+  let total=0, rows="";
+  names.forEach(n=>{
+    const paid=(votes[n]||[]).filter(id=>!BY[id]?.free);
+    const c=computeBest(paid); total+=paid.length?c.best.cost:0;
+    rows+=`<div class="gv"><div><div style="font-weight:700;font-size:14.5px">${n}</div><div class="muted">${(votes[n]||[]).length} lugares · ${paid.length?c.best.label:"solo gratis"}</div></div><div style="font-weight:800;font-size:16px">$${paid.length?c.best.cost.toFixed(0):"0"}</div></div>`;
+  });
+  const tally={}; names.forEach(n=>(votes[n]||[]).forEach(id=>tally[id]=(tally[id]||0)+1));
+  const ranked=ATTR.map(a=>({...a,c:tally[a.id]||0})).filter(a=>a.c>0).sort((a,b)=>b.c-a.c).slice(0,8);
+  let pop=ranked.map(a=>`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13.5px"><span>${a.name}${a.free?' <span style="color:var(--green);font-size:11px">gratis</span>':''}</span><span class="muted">${a.c}/${names.length}</span></div>`).join("");
+  out.innerHTML=rows
+    +`<div class="total"><span style="font-weight:800;font-size:15px">Total grupo (tickets)</span><span style="font-weight:800;font-size:20px;color:var(--green)">$${total.toFixed(0)}</span></div>`
+    +`<div class="lbl" style="margin:16px 0 6px">LO MÁS VOTADO</div>${pop}`;
+};
+</script>
+</body>
+</html>
