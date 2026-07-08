@@ -42,7 +42,7 @@
   <div class="hero">
     <div class="eyebrow">NUEVA YORK · GRUPO USA 🇺🇸</div>
     <div class="h1">¿A dónde quieres ir?</div>
-    <div class="sub">Marca tus lugares, mira tu mejor opción de tickets. Tu voto se guarda solo y se cruza con el del resto del grupo.</div>
+    <div class="sub">Marca las atracciones con costo que quieres hacer, mira tu mejor opción de tickets. Tu voto se guarda solo y se cruza con el del resto del grupo.</div>
   </div>
 
   <div class="lbl">¿QUIÉN ERES?</div>
@@ -54,9 +54,7 @@
       <div style="text-align:right"><div id="bestCost" style="font-size:24px;font-weight:800;">$0</div><div style="font-size:10.5px;color:#C9CADB">por persona</div></div>
     </div>
 
-    <div class="lbl">GRATIS · MARCA LOS QUE QUIERAS</div>
-    <div id="freeList"></div>
-    <div class="lbl">CON ENTRADA · PRECIO APROX. POR PERSONA</div>
+    <div class="lbl">MARCA LO QUE QUIERES IR · PRECIO APROX. POR PERSONA</div>
     <div id="paidList"></div>
 
     <div id="compareCard" class="card hide">
@@ -82,16 +80,6 @@
 <script>
 const MEMBERS=["Homero","Daisy","Darma","Angelicke"];
 const ATTR=[
- {id:"central_park",name:"Central Park",free:true},
- {id:"balto",name:"Estatua de Balto (Central Park)",free:true},
- {id:"brooklyn_bridge",name:"Brooklyn Bridge",free:true},
- {id:"times_square",name:"Times Square",free:true},
- {id:"staten_ferry",name:"Staten Island Ferry",free:true},
- {id:"grand_central",name:"Grand Central",free:true},
- {id:"fifth_ave",name:"5th Avenue",free:true},
- {id:"chinatown",name:"Chinatown",free:true},
- {id:"memorial911",name:"Memorial 9/11 (exterior)",free:true},
- {id:"mcgees",name:"McGee's Pub",free:true,note:"consumo aparte"},
  {id:"esb",name:"Empire State Building",price:44,citypass:"fixed",gocity:true},
  {id:"amnh",name:"Museo Historia Natural (AMNH)",price:33,citypass:"fixed",gocity:true},
  {id:"statue",name:"Estatua Libertad + Ellis Island",price:25,citypass:"choice",gocity:true},
@@ -180,13 +168,13 @@ async function loadGroup(){
     meta.textContent=`${names.length} de ${MEMBERS.length} ya votaron · se actualiza solo`;
     let total=0, rows="";
     names.forEach(n=>{
-      const paid=(votes[n]||[]).filter(id=>!BY[id]?.free);
-      const c=computeBest(paid); total+=paid.length?c.best.cost:0;
-      rows+=`<div class="gv"><div><div style="font-weight:700;font-size:14.5px">${n}</div><div class="muted">${(votes[n]||[]).length} lugares · ${paid.length?c.best.label:"solo gratis"}</div></div><div style="font-weight:800;font-size:16px">$${paid.length?c.best.cost.toFixed(0):"0"}</div></div>`;
+      const ids=votes[n]||[];
+      const c=computeBest(ids); total+=ids.length?c.best.cost:0;
+      rows+=`<div class="gv"><div><div style="font-weight:700;font-size:14.5px">${n}</div><div class="muted">${ids.length} lugares · ${ids.length?c.best.label:"nada aún"}</div></div><div style="font-weight:800;font-size:16px">$${ids.length?c.best.cost.toFixed(0):"0"}</div></div>`;
     });
     const tally={}; names.forEach(n=>(votes[n]||[]).forEach(id=>tally[id]=(tally[id]||0)+1));
     const ranked=ATTR.map(a=>({...a,c:tally[a.id]||0})).filter(a=>a.c>0).sort((a,b)=>b.c-a.c).slice(0,8);
-    let pop=ranked.map(a=>`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13.5px"><span>${a.name}${a.free?' <span style="color:var(--green);font-size:11px">gratis</span>':''}</span><span class="muted">${a.c}/${names.length}</span></div>`).join("");
+    let pop=ranked.map(a=>`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13.5px"><span>${a.name}</span><span class="muted">${a.c}/${names.length}</span></div>`).join("");
     out.innerHTML=`<div class="total"><span style="font-weight:800;font-size:15px">Total grupo (tickets)</span><span style="font-weight:800;font-size:20px;color:var(--green)">$${total.toFixed(0)}</span></div>`
       +`<div class="lbl" style="margin:16px 0 6px">LO MÁS VOTADO</div>${pop}`
       +`<div class="lbl" style="margin:16px 0 6px">POR PERSONA</div>${rows}`;
@@ -200,24 +188,22 @@ setInterval(loadGroup,10000);
 
 function rowHTML(a){
   const on=!!picks[a.id];
-  const tag=a.free?'<span style="color:var(--green)">GRATIS</span>':'$'+a.price;
   return `<button class="row ${on?'on':''}" data-id="${a.id}">
     <div class="box">${on?'✓':''}</div>
     <div class="name">${a.name}${a.note?`<div class="note">${a.note}</div>`:''}</div>
-    <div class="tag">${tag}</div></button>`;
+    <div class="tag">$${a.price}</div></button>`;
 }
 
 function render(){
   MEMBERS.forEach(m=>{ const b=membersEl.querySelector(`[data-m="${m}"]`); b.classList.toggle("on",m===me); });
   document.getElementById("picker").classList.toggle("hide",!me);
   if(!me) return;
-  document.getElementById("freeList").innerHTML=ATTR.filter(a=>a.free).map(rowHTML).join("");
-  document.getElementById("paidList").innerHTML=ATTR.filter(a=>!a.free).map(rowHTML).join("");
+  document.getElementById("paidList").innerHTML=ATTR.map(rowHTML).join("");
   document.querySelectorAll(".row").forEach(r=>r.onclick=()=>{ const id=r.dataset.id; picks[id]=!picks[id]; render(); scheduleSave(); });
 
-  const paid=Object.keys(picks).filter(k=>picks[k]&&!BY[k].free);
+  const paid=Object.keys(picks).filter(k=>picks[k]);
   const c=computeBest(paid);
-  document.getElementById("bestLabel").textContent = paid.length? c.best.label : "Solo lugares gratis 🎉";
+  document.getElementById("bestLabel").textContent = paid.length? c.best.label : "Aún no eliges nada";
   document.getElementById("bestCost").textContent = "$"+(paid.length? c.best.cost.toFixed(0):"0");
 
   const cc=document.getElementById("compareCard");
