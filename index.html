@@ -19,12 +19,17 @@
   .members button.on{ border-color:var(--goldD); background:var(--gold); color:var(--ink); }
   .bar{ position:sticky; top:8px; z-index:5; margin-top:16px; background:var(--ink); color:#fff; border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 14px rgba(30,32,51,.22); }
   .bar small{ font-size:11px; color:var(--gold); font-weight:700; letter-spacing:1px; }
-  .row{ width:100%; text-align:left; display:flex; align-items:center; gap:12px; background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:8px; cursor:pointer; }
+  .row{ display:flex; align-items:center; gap:10px; background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:10px 14px 10px 10px; margin-bottom:8px; }
   .row.on{ border-color:var(--goldD); background:#FFFDF6; }
+  .thumb{ width:52px; height:52px; border-radius:9px; flex:none; overflow:hidden; background:var(--line); }
+  .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .rowBtn{ flex:1; min-width:0; text-align:left; display:flex; align-items:center; gap:12px; padding:0; cursor:pointer; }
   .box{ width:22px; height:22px; border-radius:6px; border:2px solid var(--line); background:#fff; display:flex; align-items:center; justify-content:center; flex:none; font-weight:900; font-size:14px; }
   .row.on .box{ border-color:var(--goldD); background:var(--gold); }
   .name{ flex:1; font-weight:600; font-size:14.5px; }
+  .name a{ color:inherit; text-decoration:none; }
   .note{ font-size:11px; color:var(--ink2); }
+  .wikiLink{ font-size:10.5px; color:var(--ink2); text-decoration:none; border-bottom:1px dotted var(--ink2); }
   .tag{ font-size:12.5px; font-weight:800; font-variant-numeric:tabular-nums; }
   .card{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-top:16px; }
   .opt{ display:flex; justify-content:space-between; padding:7px 0; border-top:1px solid var(--line); font-size:14px; }
@@ -78,19 +83,41 @@
 </div>
 
 <script>
-const MEMBERS=["Homero","Daisy","Darma","Angelicke"];
+const MEMBERS=["Homero","Daisy","Darmis","Angelicke"];
 const ATTR=[
- {id:"esb",name:"Empire State Building",price:44,citypass:"fixed",gocity:true},
- {id:"amnh",name:"Museo Historia Natural (AMNH)",price:33,citypass:"fixed",gocity:true},
- {id:"statue",name:"Estatua Libertad + Ellis Island",price:25,citypass:"choice",gocity:true},
- {id:"topofrock",name:"Top of the Rock",price:40,citypass:"choice",gocity:true},
- {id:"museum911",name:"Museo 9/11",price:33,citypass:"choice",gocity:true},
- {id:"owo",name:"One World Observatory",price:44,citypass:"choice",gocity:true},
- {id:"summit",name:"SUMMIT One Vanderbilt",price:49,citypass:false,gocity:false},
- {id:"icecream",name:"Museo del Helado 🍦",price:42,citypass:false,gocity:false},
- {id:"harrypotter",name:"Harry Potter (Broadway)",price:120,citypass:false,gocity:false},
- {id:"strangerthings",name:"Stranger Things: The Experience",price:50,citypass:false,gocity:false},
- {id:"zoo",name:"Central Park Zoo",price:20,citypass:false,gocity:false},
+ {id:"esb",name:"Empire State Building",price:44,citypass:"fixed",gocity:true,
+   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Empire_State_Building_%28aerial_view%29.jpg/330px-Empire_State_Building_%28aerial_view%29.jpg",
+   wiki:"https://es.wikipedia.org/wiki/Empire_State_Building"},
+ {id:"amnh",name:"Museo Historia Natural (AMNH)",price:33,citypass:"fixed",gocity:true,
+   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/USA-NYC-American_Museum_of_Natural_History.JPG/330px-USA-NYC-American_Museum_of_Natural_History.JPG",
+   wiki:"https://es.wikipedia.org/wiki/Museo_Americano_de_Historia_Natural"},
+ {id:"statue",name:"Estatua Libertad + Ellis Island",price:25,citypass:"choice",gocity:true,
+   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Statue_of_Liberty_7.jpg/330px-Statue_of_Liberty_7.jpg",
+   wiki:"https://es.wikipedia.org/wiki/Estatua_de_la_Libertad"},
+ {id:"topofrock",name:"Top of the Rock",price:40,citypass:"choice",gocity:true,
+   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/30_Rockefeller_Plaza_view_from_Empire_State_Building%2C_around_1_pm.jpg/330px-30_Rockefeller_Plaza_view_from_Empire_State_Building%2C_around_1_pm.jpg",
+   wiki:"https://en.wikipedia.org/wiki/30_Rockefeller_Plaza"},
+ {id:"museum911",name:"Museo 9/11",price:33,citypass:"choice",gocity:true,
+   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/9-11_Memorial_and_Museum_%2828815276064%29.jpg/330px-9-11_Memorial_and_Museum_%2828815276064%29.jpg",
+   wiki:"https://en.wikipedia.org/wiki/National_September_11_Memorial_%26_Museum"},
+ {id:"owo",name:"One World Observatory",price:44,citypass:"choice",gocity:true,
+   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/One_World_Trade_Center%2C_Financial_District%2C_Manhattan%2C_New_York.jpg/330px-One_World_Trade_Center%2C_Financial_District%2C_Manhattan%2C_New_York.jpg",
+   wiki:"https://en.wikipedia.org/wiki/One_World_Trade_Center"},
+ {id:"summit",name:"SUMMIT One Vanderbilt",price:49,citypass:false,gocity:false,
+   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/One_Vanderbilt_July_2024_001.jpg/330px-One_Vanderbilt_July_2024_001.jpg",
+   wiki:"https://en.wikipedia.org/wiki/One_Vanderbilt"},
+ {id:"icecream",name:"Museo del Helado 🍦",price:42,citypass:false,gocity:false,
+   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Museum_of_Ice_Cream_558_Broadway.jpg/330px-Museum_of_Ice_Cream_558_Broadway.jpg",
+   wiki:"https://en.wikipedia.org/wiki/Museum_of_Ice_Cream"},
+ {id:"harrypotter",name:"Harry Potter (Broadway)",price:120,citypass:false,gocity:false,
+   img:"https://upload.wikimedia.org/wikipedia/en/8/87/Cursed_Child_new_poster.jpg",
+   wiki:"https://en.wikipedia.org/wiki/Harry_Potter_and_the_Cursed_Child"},
+ {id:"strangerthings",name:"Stranger Things: The Experience",price:50,citypass:false,gocity:false,
+   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Stranger_Things_logo.png/330px-Stranger_Things_logo.png",
+   wiki:"https://en.wikipedia.org/wiki/Stranger_Things"},
+ {id:"zoo",name:"Central Park Zoo",price:20,citypass:false,gocity:false,
+   img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Central_Park_Zoo_area.jpg/330px-Central_Park_Zoo_area.jpg",
+   wiki:"https://es.wikipedia.org/wiki/Zoológico_de_Central_Park"},
 ];
 const BY={}; ATTR.forEach(a=>BY[a.id]=a);
 const CITYPASS=146, GOCITY={2:84,3:99,4:119,5:139,6:164,7:184};
@@ -188,10 +215,14 @@ setInterval(loadGroup,10000);
 
 function rowHTML(a){
   const on=!!picks[a.id];
-  return `<button class="row ${on?'on':''}" data-id="${a.id}">
-    <div class="box">${on?'✓':''}</div>
-    <div class="name">${a.name}${a.note?`<div class="note">${a.note}</div>`:''}</div>
-    <div class="tag">$${a.price}</div></button>`;
+  return `<div class="row ${on?'on':''}">
+    <a class="thumb" href="${a.wiki}" target="_blank" rel="noopener"><img src="${a.img}" alt="${a.name}" loading="lazy" onerror="this.parentElement.style.background='var(--line)';this.remove()"></a>
+    <div class="rowBtn" role="button" tabindex="0" data-id="${a.id}">
+      <div class="box">${on?'✓':''}</div>
+      <div class="name">${a.name}${a.note?`<div class="note">${a.note}</div>`:''}<div><a class="wikiLink" href="${a.wiki}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Wikipedia ↗</a></div></div>
+      <div class="tag">$${a.price}</div>
+    </div>
+  </div>`;
 }
 
 function render(){
@@ -199,7 +230,11 @@ function render(){
   document.getElementById("picker").classList.toggle("hide",!me);
   if(!me) return;
   document.getElementById("paidList").innerHTML=ATTR.map(rowHTML).join("");
-  document.querySelectorAll(".row").forEach(r=>r.onclick=()=>{ const id=r.dataset.id; picks[id]=!picks[id]; render(); scheduleSave(); });
+  document.querySelectorAll(".rowBtn").forEach(r=>{
+    const toggle=()=>{ const id=r.dataset.id; picks[id]=!picks[id]; render(); scheduleSave(); };
+    r.onclick=toggle;
+    r.onkeydown=(e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(); } };
+  });
 
   const paid=Object.keys(picks).filter(k=>picks[k]);
   const c=computeBest(paid);
