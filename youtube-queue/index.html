@@ -76,6 +76,11 @@
       </div>
     </div>
 
+    <div id="hostQrCard" class="card hide" style="text-align:center">
+      <div class="lbl" style="margin:0 0 8px">ESCANEA PARA UNIRTE</div>
+      <img id="qrImg" src="" alt="Código QR para unirse a la sala" width="180" height="180" style="border-radius:10px">
+    </div>
+
     <div id="hostPlayerCard" class="card hide">
       <div class="lbl" style="margin:0">SONANDO AQUÍ</div>
       <div id="player"></div>
@@ -152,14 +157,23 @@ document.getElementById("joinBtn").onclick=async()=>{
   enterRoom(code, localStorage.getItem(`ytq_host_${code}`)==="1");
 };
 
+function roomLink(){
+  const url=new URL(location.href); url.searchParams.set("sala",roomCode);
+  return url.toString();
+}
+
 function enterRoom(code, host){
   roomCode=code; isHost=host;
   document.getElementById("landing").classList.add("hide");
   document.getElementById("roomView").classList.remove("hide");
   document.getElementById("roomCodeLabel").textContent=code;
+  document.getElementById("hostQrCard").classList.toggle("hide",!host);
   document.getElementById("hostPlayerCard").classList.toggle("hide",!host);
   document.getElementById("guestNowPlaying").classList.toggle("hide",host);
   const url=new URL(location.href); url.searchParams.set("sala",code); history.replaceState(null,"",url);
+  if(host){
+    document.getElementById("qrImg").src=`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(roomLink())}`;
+  }
   watchQueue();
   watchNowPlaying();
 }
@@ -167,10 +181,10 @@ function enterRoom(code, host){
 document.getElementById("leaveBtn").onclick=()=>{ location.href=location.pathname; };
 
 document.getElementById("copyLinkBtn").onclick=()=>{
-  const url=new URL(location.href); url.searchParams.set("sala",roomCode);
+  const link=roomLink();
   const done=()=>{ const b=document.getElementById("copyLinkBtn"); const t=b.textContent; b.textContent="✓ Copiado"; setTimeout(()=>b.textContent=t,1800); };
-  if(navigator.clipboard){ navigator.clipboard.writeText(url.toString()).then(done).catch(()=>prompt("Copia el link:",url.toString())); }
-  else prompt("Copia el link:",url.toString());
+  if(navigator.clipboard){ navigator.clipboard.writeText(link).then(done).catch(()=>prompt("Copia el link:",link)); }
+  else prompt("Copia el link:",link);
 };
 
 // --- Búsqueda YouTube ---
