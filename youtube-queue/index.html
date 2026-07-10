@@ -253,13 +253,24 @@ function renderQueue(q){
       <div class="qnum">${i+1}</div>
       <div class="thumb"><img src="${it.thumb}" alt=""></div>
       <div class="rtitle">${it.title}<div class="rmeta">agregó ${it.addedBy}</div></div>
+      <button class="btn ghost small" data-play="${k}" title="Reproducir ahora">▶️</button>
       <button class="btn ghost small" data-key="${k}">✕</button>
     </div>`;
   }).join("");
   list.querySelectorAll("button[data-key]").forEach(b=>b.onclick=()=>removeFromQueue(b.dataset.key));
+  list.querySelectorAll("button[data-play]").forEach(b=>b.onclick=()=>playNow(b.dataset.play,q[b.dataset.play]));
 }
 
-// --- Now playing (para invitados) ---
+async function playNow(key,item){
+  await removeFromQueue(key);
+  await fetch(`${DB_URL}/rooms/${roomCode}/nowPlaying.json`,{
+    method:"PUT", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({videoId:item.videoId,title:item.title,thumb:item.thumb,startedAt:Date.now()})
+  });
+}
+
+// --- Now playing (para invitados, y para que el host detecte "reproducir ahora") ---
+let currentLoadedVideoId=null;
 function watchNowPlaying(){
   const poll=async()=>{
     if(!roomCode) return;
@@ -271,9 +282,16 @@ function watchNowPlaying(){
         box.innerHTML = np
           ? `<div class="thumb"><img src="${np.thumb}" alt=""></div><div class="rtitle">${np.title}</div>`
           : `<span class="muted">Nada sonando todavía</span>`;
+      }else if(ytPlayer){
+        if(np && np.videoId!==currentLoadedVideoId){
+          ytPlayer.loadVideoById(np.videoId);
+          currentLoadedVideoId=np.videoId;
+        }else if(!np){
+          currentLoadedVideoId=null;
+        }
       }
     }catch(e){}
-    setTimeout(poll,4000);
+    setTimeout(poll,2500);
   };
   poll();
 }
@@ -293,7 +311,7 @@ async function maybeAdvance(queueSnapshot){
     method:"PUT", headers:{"Content-Type":"application/json"},
     body:JSON.stringify({videoId:next.videoId,title:next.title,thumb:next.thumb,startedAt:Date.now()})
   });
-  if(ytPlayer) ytPlayer.loadVideoById(next.videoId);
+  if(ytPlayer){ ytPlayer.loadVideoById(next.videoId); currentLoadedVideoId=next.videoId; }
   playerEngineRunning=false;
 }
 
@@ -306,12 +324,19 @@ function onYouTubeIframeAPIReady(){
         if(!isHost||!roomCode) return;
         const res=await fetch(`${DB_URL}/rooms/${roomCode}/nowPlaying.json`,{cache:"no-store"});
         const np=await res.json();
-        if(np) ytPlayer.loadVideoById(np.videoId);
+        if(np){ ytPlayer.loadVideoById(np.videoId); currentLoadedVideoId=np.videoId; }
       },
       onStateChange:async(e)=>{
         if(e.data===YT.PlayerState.ENDED){
+          currentLoadedVideoId=null;
           await fetch(`${DB_URL}/rooms/${roomCode}/nowPlaying.json`,{method:"DELETE"});
         }
+      },
+      onError:async()=>{
+        // Video no reproducible (embed bloqueado, privado, etc.) — saltar a la siguiente
+        if(!isHost||!roomCode) return;
+        currentLoadedVideoId=null;
+        await fetch(`${DB_URL}/rooms/${roomCode}/nowPlaying.json`,{method:"DELETE"});
       }
     }
   });
